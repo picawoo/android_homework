@@ -1,4 +1,4 @@
-package com.example.androidhomework.data.model
+package com.example.androidhomework.domain.model
 
 data class Book(
     val id: String,
@@ -6,10 +6,8 @@ data class Book(
     val author: String,
     val publishYear: Int,
     val coverUrl: String,
-    val rating: Float,
-    val ratingsCount: Int,
+    val editionCount: Int,
     val description: String,
     val subjects: List<String>,
-    val pageCount: Int,
     val language: String
 )
