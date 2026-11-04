@@ -29,9 +29,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.ErrorOutline
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SearchOff
+import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -63,6 +68,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.androidhomework.domain.model.Book
 import com.example.androidhomework.ui.viewmodel.BookListViewModel
+import com.example.androidhomework.ui.viewmodel.FavoritesViewModel
 
 private const val MAX_VISIBLE_SUBJECTS = 2
 private const val SKELETON_COUNT = 5
@@ -72,11 +78,16 @@ private enum class ContentState { Loading, Error, Empty, Content }
 @Composable
 fun BookListScreen(
     viewModel: BookListViewModel,
+    favoritesViewModel: FavoritesViewModel,
     onBookClick: (bookId: String, author: String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var query by rememberSaveable { mutableStateOf(uiState.searchQuery) }
     val keyboardController = LocalSoftwareKeyboardController.current
+    var showFilterSheet by remember { mutableStateOf(false) }
+    val hasActiveFilters by viewModel.filterBadgeCache.hasActiveFilters.collectAsState()
+    val favoriteBooks by favoritesViewModel.favoriteBooks.collectAsState()
+    val favoriteIds = remember(favoriteBooks) { favoriteBooks.mapTo(HashSet()) { it.id } }
 
     GradientBackground {
         Scaffold(containerColor = Color.Transparent) { padding ->
@@ -85,7 +96,35 @@ fun BookListScreen(
                     .fillMaxSize()
                     .padding(padding)
             ) {
-                BookListHeader()
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 4.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(modifier = Modifier.weight(1f)) {
+                        BookListHeader()
+                    }
+                    BadgedBox(
+                        badge = {
+                            if (hasActiveFilters) {
+                                Badge(
+                                    containerColor = Color(0xFFFF9800)
+                                )
+                            }
+                        },
+                        modifier = Modifier.padding(end = 12.dp, top = 12.dp)
+                    ) {
+                        IconButton(onClick = { showFilterSheet = true }) {
+                            Icon(
+                                imageVector = Icons.Default.Tune,
+                                contentDescription = "Filters",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                }
 
                 SearchField(
                     query = query,
@@ -102,14 +141,28 @@ fun BookListScreen(
 
                 BookListContent(
                     books = uiState.books,
+                    favoriteIds = favoriteIds,
                     isLoading = uiState.isLoading,
                     errorMessage = uiState.errorMessage,
                     onRetry = { viewModel.loadBooks(uiState.searchQuery) },
                     onBookClick = onBookClick,
+                    onToggleFavorite = { book ->
+                        favoritesViewModel.toggleFavorite(book)
+                    },
                     modifier = Modifier.fillMaxSize()
                 )
             }
         }
+    }
+
+    if (showFilterSheet) {
+        FilterBottomSheet(
+            initialFilters = viewModel.getSavedFilters(),
+            onDismiss = { showFilterSheet = false },
+            onApply = { newFilters ->
+                viewModel.applyFilters(newFilters)
+            }
+        )
     }
 }
 
@@ -192,10 +245,12 @@ private fun SearchField(
 @Composable
 private fun BookListContent(
     books: List<Book>,
+    favoriteIds: Set<String>,
     isLoading: Boolean,
     errorMessage: String?,
     onRetry: () -> Unit,
     onBookClick: (bookId: String, author: String) -> Unit,
+    onToggleFavorite: (Book) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val state = when {
@@ -210,7 +265,7 @@ private fun BookListContent(
             ContentState.Loading -> LoadingState(Modifier.fillMaxSize())
             ContentState.Error -> ErrorState(errorMessage.orEmpty(), onRetry, Modifier.fillMaxSize())
             ContentState.Empty -> EmptyState(Modifier.fillMaxSize())
-            ContentState.Content -> BooksList(books, onBookClick, Modifier.fillMaxSize())
+            ContentState.Content -> BooksList(books, favoriteIds, onBookClick, onToggleFavorite, Modifier.fillMaxSize())
         }
     }
 }
@@ -272,7 +327,9 @@ private fun EmptyState(modifier: Modifier = Modifier) {
 @Composable
 private fun BooksList(
     books: List<Book>,
+    favoriteIds: Set<String>,
     onBookClick: (bookId: String, author: String) -> Unit,
+    onToggleFavorite: (Book) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -291,7 +348,9 @@ private fun BooksList(
         items(books, key = { it.id }) { book ->
             BookItemCard(
                 book = book,
-                onClick = { onBookClick(book.id, book.author) }
+                isFavorite = favoriteIds.contains(book.id),
+                onClick = { onBookClick(book.id, book.author) },
+                onToggleFavorite = { onToggleFavorite(book) }
             )
         }
     }
@@ -350,9 +409,11 @@ private fun SkeletonCard(brush: Brush) {
 }
 
 @Composable
-private fun BookItemCard(
+fun BookItemCard(
     book: Book,
+    isFavorite: Boolean,
     onClick: () -> Unit,
+    onToggleFavorite: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -397,7 +458,12 @@ private fun BookItemCard(
 
             Spacer(modifier = Modifier.width(14.dp))
 
-            BookInfo(book = book, modifier = Modifier.weight(1f))
+            BookInfo(
+                book = book,
+                isFavorite = isFavorite,
+                onToggleFavorite = onToggleFavorite,
+                modifier = Modifier.weight(1f)
+            )
         }
     }
 }
@@ -405,17 +471,37 @@ private fun BookItemCard(
 @Composable
 private fun BookInfo(
     book: Book,
+    isFavorite: Boolean,
+    onToggleFavorite: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
-        Text(
-            text = book.title,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            color = MaterialTheme.colorScheme.onSurface
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Top
+        ) {
+            Text(
+                text = book.title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.weight(1f)
+            )
+
+            IconButton(
+                onClick = onToggleFavorite,
+                modifier = Modifier.padding(start = 4.dp, top = 0.dp)
+            ) {
+                Icon(
+                    imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                    contentDescription = if (isFavorite) "Remove from favorites" else "Add to favorites",
+                    tint = if (isFavorite) Color(0xFFE91E63) else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
 
         Text(
             text = book.author,
@@ -424,7 +510,7 @@ private fun BookInfo(
             color = MaterialTheme.colorScheme.primary,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.padding(top = 2.dp, bottom = 10.dp)
+            modifier = Modifier.padding(bottom = 10.dp)
         )
 
         FlowRow(

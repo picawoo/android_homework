@@ -28,8 +28,10 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.androidhomework.ui.screen.BookDetailScreen
 import com.example.androidhomework.ui.screen.BookListScreen
+import com.example.androidhomework.ui.screen.FavoritesScreen
 import com.example.androidhomework.ui.viewmodel.BookDetailViewModel
 import com.example.androidhomework.ui.viewmodel.BookListViewModel
+import com.example.androidhomework.ui.viewmodel.FavoritesViewModel
 
 @Composable
 fun MainScreen() {
@@ -81,6 +83,7 @@ private fun AppNavHost(
     modifier: Modifier = Modifier
 ) {
     val bookListViewModel: BookListViewModel = viewModel(factory = BookListViewModel.Factory)
+    val favoritesViewModel: FavoritesViewModel = viewModel(factory = FavoritesViewModel.Factory)
 
     NavHost(
         navController = navController,
@@ -90,13 +93,21 @@ private fun AppNavHost(
         composable(Screen.BookList.route) {
             BookListScreen(
                 viewModel = bookListViewModel,
+                favoritesViewModel = favoritesViewModel,
                 onBookClick = { bookId, author ->
                     navController.navigate(Screen.BookDetail.createRoute(bookId, author))
                 }
             )
         }
 
-        composable(Screen.Favorites.route) { PlaceholderScreen("Favorites Screen") }
+        composable(Screen.Favorites.route) {
+            FavoritesScreen(
+                viewModel = favoritesViewModel,
+                onBookClick = { bookId, author ->
+                    navController.navigate(Screen.BookDetail.createRoute(bookId, author))
+                }
+            )
+        }
         composable(Screen.Profile.route) { PlaceholderScreen("Profile Screen") }
 
         composable(
