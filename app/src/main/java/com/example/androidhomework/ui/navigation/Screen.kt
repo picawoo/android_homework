@@ -27,6 +27,8 @@ sealed class Screen(val route: String, val title: String) {
             "book_detail/${Uri.encode(bookId)}/${Uri.encode(author)}"
     }
 
+    data object ProfileEdit : Screen("profile_edit", "Edit profile")
+
     companion object {
         val bottomNavItems: List<TopLevel> = listOf(BookList, Favorites, Profile)
     }

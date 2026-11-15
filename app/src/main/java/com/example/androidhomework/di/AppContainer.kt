@@ -1,6 +1,10 @@
 package com.example.androidhomework.di
 
 import android.content.Context
+import com.example.androidhomework.data.files.AvatarStorage
+import com.example.androidhomework.data.files.ResumeDownloader
+import com.example.androidhomework.data.repository.ProfileRepositoryImpl
+import com.example.androidhomework.domain.repository.ProfileRepository
 import com.example.androidhomework.data.local.AppDatabase
 import com.example.androidhomework.data.preferences.FilterBadgeCache
 import com.example.androidhomework.data.preferences.FilterPreferences
@@ -53,5 +57,17 @@ object AppContainer {
 
     val filterBadgeCache: FilterBadgeCache by lazy {
         FilterBadgeCache()
+    }
+
+    val profileRepository: ProfileRepository by lazy {
+        ProfileRepositoryImpl(applicationContext)
+    }
+
+    val avatarStorage: AvatarStorage by lazy {
+        AvatarStorage(applicationContext)
+    }
+
+    val resumeDownloader: ResumeDownloader by lazy {
+        ResumeDownloader(applicationContext)
     }
 }

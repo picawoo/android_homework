@@ -1,11 +1,8 @@
 package com.example.androidhomework.ui.navigation
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
@@ -13,7 +10,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination
@@ -28,10 +24,14 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.androidhomework.ui.screen.BookDetailScreen
 import com.example.androidhomework.ui.screen.BookListScreen
+import com.example.androidhomework.ui.screen.EditProfileScreen
 import com.example.androidhomework.ui.screen.FavoritesScreen
+import com.example.androidhomework.ui.screen.ProfileScreen
 import com.example.androidhomework.ui.viewmodel.BookDetailViewModel
 import com.example.androidhomework.ui.viewmodel.BookListViewModel
+import com.example.androidhomework.ui.viewmodel.EditProfileViewModel
 import com.example.androidhomework.ui.viewmodel.FavoritesViewModel
+import com.example.androidhomework.ui.viewmodel.ProfileViewModel
 
 @Composable
 fun MainScreen() {
@@ -108,7 +108,22 @@ private fun AppNavHost(
                 }
             )
         }
-        composable(Screen.Profile.route) { PlaceholderScreen("Profile Screen") }
+        composable(Screen.Profile.route) {
+            val profileViewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.Factory)
+            ProfileScreen(
+                viewModel = profileViewModel,
+                onEditClick = { navController.navigate(Screen.ProfileEdit.route) }
+            )
+        }
+
+        composable(Screen.ProfileEdit.route) {
+            val editViewModel: EditProfileViewModel = viewModel(factory = EditProfileViewModel.Factory)
+            EditProfileScreen(
+                viewModel = editViewModel,
+                onBackClick = { navController.popBackStack() },
+                onDone = { navController.popBackStack() }
+            )
+        }
 
         composable(
             route = Screen.BookDetail.route,
@@ -133,16 +148,6 @@ private fun BookDetailRoute(onBackClick: () -> Unit) {
         errorMessage = state.errorMessage,
         onBackClick = onBackClick
     )
-}
-
-@Composable
-private fun PlaceholderScreen(text: String) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(text = text, style = MaterialTheme.typography.titleMedium)
-    }
 }
 
 private fun NavHostController.navigateToTopLevel(route: String) {
