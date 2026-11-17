@@ -23,6 +23,7 @@ class ProfileRepositoryImpl(
         val POSITION = stringPreferencesKey("profile_position")
         val AVATAR_URI = stringPreferencesKey("profile_avatar_uri")
         val RESUME_URL = stringPreferencesKey("profile_resume_url")
+        val CLASS_TIME = stringPreferencesKey("profile_class_time")
     }
 
     override val profile: Flow<UserProfile> = context.profileDataStore.data
@@ -34,7 +35,8 @@ class ProfileRepositoryImpl(
                 fullName = prefs[Keys.FULL_NAME].orEmpty(),
                 position = prefs[Keys.POSITION].orEmpty(),
                 avatarUri = prefs[Keys.AVATAR_URI],
-                resumeUrl = prefs[Keys.RESUME_URL].orEmpty()
+                resumeUrl = prefs[Keys.RESUME_URL].orEmpty(),
+                classTime = prefs[Keys.CLASS_TIME].orEmpty()
             )
         }
 
@@ -43,6 +45,7 @@ class ProfileRepositoryImpl(
             prefs[Keys.FULL_NAME] = profile.fullName
             prefs[Keys.POSITION] = profile.position
             prefs[Keys.RESUME_URL] = profile.resumeUrl
+            prefs[Keys.CLASS_TIME] = profile.classTime
             if (profile.avatarUri != null) {
                 prefs[Keys.AVATAR_URI] = profile.avatarUri
             } else {

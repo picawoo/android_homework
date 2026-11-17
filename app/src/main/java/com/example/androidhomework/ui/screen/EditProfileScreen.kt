@@ -8,7 +8,9 @@ import android.content.ContextWrapper
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.provider.Settings
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -33,7 +35,9 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PhotoCamera
@@ -81,9 +85,12 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.example.androidhomework.ui.viewmodel.EditProfileViewModel
+import com.example.androidhomework.domain.model.parseClassTime
 import kotlinx.coroutines.launch
+import java.time.LocalTime
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -100,10 +107,14 @@ fun EditProfileScreen(
 
     var showSourceSheet by rememberSaveable { mutableStateOf(false) }
     var showSettingsDialog by rememberSaveable { mutableStateOf(false) }
+    var showTimePicker by rememberSaveable { mutableStateOf(false) }
     var pendingCameraUri by rememberSaveable { mutableStateOf<Uri?>(null) }
 
     LaunchedEffect(state.isSaved) {
-        if (state.isSaved) onDone()
+        if (state.isSaved) {
+            state.savedMessage?.let { Toast.makeText(context, it, Toast.LENGTH_LONG).show() }
+            onDone()
+        }
     }
     LaunchedEffect(viewModel) {
         viewModel.messages.collect { snackbarHostState.showSnackbar(it) }
@@ -153,6 +164,32 @@ fun EditProfileScreen(
         if (granted) launchCamera() else cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
     }
 
+    fun saveProfile() {
+        if (!NotificationManagerCompat.from(context).areNotificationsEnabled()) {
+            Toast.makeText(
+                context,
+                "Notifications are off, so the reminder won't be shown",
+                Toast.LENGTH_LONG
+            ).show()
+        }
+        viewModel.onDoneClick()
+    }
+
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { saveProfile() }
+
+    fun onSaveClick() {
+        val needsPermission = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) !=
+                PackageManager.PERMISSION_GRANTED
+        if (needsPermission) {
+            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        } else {
+            saveProfile()
+        }
+    }
+
     GradientBackground {
         Scaffold(
             containerColor = Color.Transparent,
@@ -169,7 +206,7 @@ fun EditProfileScreen(
                         }
                     },
                     actions = {
-                        TextButton(onClick = viewModel::onDoneClick, enabled = state.canSave) {
+                        TextButton(onClick = ::onSaveClick, enabled = state.canSave) {
                             Text("Done", fontWeight = FontWeight.Bold)
                         }
                     },
@@ -232,9 +269,32 @@ fun EditProfileScreen(
                     )
 
                     ProfileTextField(
+                        value = state.classTime,
+                        onValueChange = viewModel::onClassTimeChange,
+                        label = "Favorite class time (HH:mm)",
+                        icon = Icons.Default.School,
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Text,
+                            imeAction = ImeAction.Next
+                        ),
+                        keyboardActions = KeyboardActions(
+                            onNext = { focusManager.moveFocus(FocusDirection.Down) }
+                        ),
+                        errorText = state.classTimeError,
+                        trailingIcon = {
+                            IconButton(onClick = { showTimePicker = true }) {
+                                Icon(
+                                    imageVector = Icons.Default.AccessTime,
+                                    contentDescription = "Pick time"
+                                )
+                            }
+                        }
+                    )
+
+                    ProfileTextField(
                         value = state.resumeUrl,
                         onValueChange = viewModel::onResumeUrlChange,
-                        label = "Resume link",
+                        label = "Resume link (pdf)",
                         icon = Icons.Default.Link,
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Uri,
@@ -265,6 +325,17 @@ fun EditProfileScreen(
                 showSourceSheet = false
                 viewModel.onRemoveAvatar()
             }
+        )
+    }
+
+    if (showTimePicker) {
+        ClassTimePickerDialog(
+            initialTime = parseClassTime(state.classTime) ?: LocalTime.now(),
+            onConfirm = { hour, minute ->
+                showTimePicker = false
+                viewModel.onClassTimePicked(hour, minute)
+            },
+            onDismiss = { showTimePicker = false }
         )
     }
 
@@ -329,7 +400,8 @@ private fun ProfileTextField(
     keyboardOptions: KeyboardOptions,
     keyboardActions: KeyboardActions,
     modifier: Modifier = Modifier,
-    errorText: String? = null
+    errorText: String? = null,
+    trailingIcon: (@Composable () -> Unit)? = null
 ) {
     OutlinedTextField(
         value = value,
@@ -339,6 +411,7 @@ private fun ProfileTextField(
         leadingIcon = {
             Icon(imageVector = icon, contentDescription = null)
         },
+        trailingIcon = trailingIcon,
         isError = errorText != null,
         supportingText = errorText?.let { { Text(it) } },
         singleLine = true,

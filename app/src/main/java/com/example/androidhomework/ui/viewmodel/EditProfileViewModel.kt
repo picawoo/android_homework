@@ -11,6 +11,9 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.androidhomework.data.files.AvatarStorage
 import com.example.androidhomework.di.AppContainer
 import com.example.androidhomework.domain.model.UserProfile
+import com.example.androidhomework.domain.model.formatClassTime
+import com.example.androidhomework.domain.model.parseClassTime
+import com.example.androidhomework.notifications.ClassReminderScheduler
 import com.example.androidhomework.domain.repository.ProfileRepository
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -27,9 +30,11 @@ data class EditProfileUiState(
     val fullName: String = "",
     val position: String = "",
     val resumeUrl: String = "",
+    val classTime: String = "",
     val avatarUri: String? = null,
     val isSaving: Boolean = false,
-    val isSaved: Boolean = false
+    val isSaved: Boolean = false,
+    val savedMessage: String? = null
 ) {
     val resumeUrlError: String?
         get() {
@@ -42,8 +47,15 @@ data class EditProfileUiState(
             }
         }
 
+    val classTimeError: String?
+        get() = when {
+            classTime.isBlank() -> "Class time is required (HH:mm)"
+            parseClassTime(classTime) == null -> "Enter time in HH:mm format, e.g. 09:30"
+            else -> null
+        }
+
     val canSave: Boolean
-        get() = isLoaded && !isSaving && resumeUrlError == null
+        get() = isLoaded && !isSaving && resumeUrlError == null && classTimeError == null
 }
 
 internal fun normalizeResumeUrl(raw: String): String {
@@ -56,7 +68,8 @@ private fun isValidResumeUrl(url: String): Boolean =
 
 class EditProfileViewModel(
     private val repository: ProfileRepository,
-    private val avatarStorage: AvatarStorage
+    private val avatarStorage: AvatarStorage,
+    private val reminderScheduler: ClassReminderScheduler
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(EditProfileUiState())
@@ -77,6 +90,7 @@ class EditProfileViewModel(
                 fullName = profile.fullName,
                 position = profile.position,
                 resumeUrl = profile.resumeUrl,
+                classTime = profile.classTime,
                 avatarUri = profile.avatarUri
             )
         }
@@ -87,6 +101,15 @@ class EditProfileViewModel(
     fun onPositionChange(value: String) = _uiState.update { it.copy(position = value) }
 
     fun onResumeUrlChange(value: String) = _uiState.update { it.copy(resumeUrl = value) }
+
+    fun onClassTimeChange(value: String) {
+        val filtered = value.filter { it.isDigit() || it == ':' }.take(5)
+        _uiState.update { it.copy(classTime = filtered) }
+    }
+
+    fun onClassTimePicked(hour: Int, minute: Int) {
+        _uiState.update { it.copy(classTime = formatClassTime(java.time.LocalTime.of(hour, minute))) }
+    }
 
     fun createCameraTarget(): Uri = avatarStorage.createCameraTarget()
 
@@ -125,6 +148,7 @@ class EditProfileViewModel(
     fun onDoneClick() {
         val state = _uiState.value
         if (!state.canSave) return
+        val classTime = parseClassTime(state.classTime) ?: return
 
         _uiState.update { it.copy(isSaving = true) }
         viewModelScope.launch {
@@ -133,12 +157,22 @@ class EditProfileViewModel(
                     fullName = state.fullName.trim(),
                     position = state.position.trim(),
                     avatarUri = state.avatarUri,
-                    resumeUrl = normalizeResumeUrl(state.resumeUrl)
+                    resumeUrl = normalizeResumeUrl(state.resumeUrl),
+                    classTime = formatClassTime(classTime)
                 )
             )
             avatarStorage.deleteAllExcept(state.avatarUri)
+
+            val reminder = reminderScheduler.schedule(state.fullName.trim(), classTime)
+
             saved = true
-            _uiState.update { it.copy(isSaving = false, isSaved = true) }
+            _uiState.update {
+                it.copy(
+                    isSaving = false,
+                    isSaved = true,
+                    savedMessage = reminder.toMessage(formatClassTime(classTime))
+                )
+            }
         }
     }
 
@@ -151,9 +185,16 @@ class EditProfileViewModel(
             initializer {
                 EditProfileViewModel(
                     repository = AppContainer.profileRepository,
-                    avatarStorage = AppContainer.avatarStorage
+                    avatarStorage = AppContainer.avatarStorage,
+                    reminderScheduler = AppContainer.classReminderScheduler
                 )
             }
         }
     }
+}
+
+private fun ClassReminderScheduler.Result.toMessage(time: String): String {
+    val day = if (isToday) "today" else "tomorrow"
+    val base = "Reminder set for $day at $time"
+    return if (isExact) base else "$base. It may arrive a few minutes late"
 }

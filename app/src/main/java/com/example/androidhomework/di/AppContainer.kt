@@ -5,6 +5,7 @@ import com.example.androidhomework.data.files.AvatarStorage
 import com.example.androidhomework.data.files.ResumeDownloader
 import com.example.androidhomework.data.repository.ProfileRepositoryImpl
 import com.example.androidhomework.domain.repository.ProfileRepository
+import com.example.androidhomework.notifications.ClassReminderScheduler
 import com.example.androidhomework.data.local.AppDatabase
 import com.example.androidhomework.data.preferences.FilterBadgeCache
 import com.example.androidhomework.data.preferences.FilterPreferences
@@ -69,5 +70,9 @@ object AppContainer {
 
     val resumeDownloader: ResumeDownloader by lazy {
         ResumeDownloader(applicationContext)
+    }
+
+    val classReminderScheduler: ClassReminderScheduler by lazy {
+        ClassReminderScheduler(applicationContext)
     }
 }

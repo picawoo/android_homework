@@ -22,6 +22,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Edit
@@ -188,6 +189,10 @@ private fun ProfileContent(
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.primary
             )
+        }
+
+        if (profile.classTime.isNotBlank()) {
+            MetaBadge(text = "Favorite class at ${profile.classTime}", icon = Icons.Default.AccessTime)
         }
 
         Spacer(modifier = Modifier.height(16.dp))
