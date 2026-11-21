@@ -22,16 +22,14 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.androidhomework.feature.profile.EditProfileRoute
+import com.example.androidhomework.feature.profile.ProfileRoute
 import com.example.androidhomework.ui.screen.BookDetailScreen
 import com.example.androidhomework.ui.screen.BookListScreen
-import com.example.androidhomework.ui.screen.EditProfileScreen
 import com.example.androidhomework.ui.screen.FavoritesScreen
-import com.example.androidhomework.ui.screen.ProfileScreen
 import com.example.androidhomework.ui.viewmodel.BookDetailViewModel
 import com.example.androidhomework.ui.viewmodel.BookListViewModel
-import com.example.androidhomework.ui.viewmodel.EditProfileViewModel
 import com.example.androidhomework.ui.viewmodel.FavoritesViewModel
-import com.example.androidhomework.ui.viewmodel.ProfileViewModel
 
 @Composable
 fun MainScreen() {
@@ -109,17 +107,13 @@ private fun AppNavHost(
             )
         }
         composable(Screen.Profile.route) {
-            val profileViewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.Factory)
-            ProfileScreen(
-                viewModel = profileViewModel,
+            ProfileRoute(
                 onEditClick = { navController.navigate(Screen.ProfileEdit.route) }
             )
         }
 
         composable(Screen.ProfileEdit.route) {
-            val editViewModel: EditProfileViewModel = viewModel(factory = EditProfileViewModel.Factory)
-            EditProfileScreen(
-                viewModel = editViewModel,
+            EditProfileRoute(
                 onBackClick = { navController.popBackStack() },
                 onDone = { navController.popBackStack() }
             )

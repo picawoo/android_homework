@@ -1,4 +1,4 @@
-package com.example.androidhomework.ui.viewmodel
+package com.example.androidhomework.feature.profile.ui
 
 import android.net.Uri
 import android.util.Patterns
@@ -8,13 +8,13 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.example.androidhomework.data.files.AvatarStorage
-import com.example.androidhomework.di.AppContainer
-import com.example.androidhomework.domain.model.UserProfile
-import com.example.androidhomework.domain.model.formatClassTime
-import com.example.androidhomework.domain.model.parseClassTime
-import com.example.androidhomework.notifications.ClassReminderScheduler
-import com.example.androidhomework.domain.repository.ProfileRepository
+import com.example.androidhomework.feature.profile.ProfileModule
+import com.example.androidhomework.feature.profile.data.AvatarStorage
+import com.example.androidhomework.feature.profile.domain.ProfileRepository
+import com.example.androidhomework.feature.profile.domain.UserProfile
+import com.example.androidhomework.feature.profile.domain.formatClassTime
+import com.example.androidhomework.feature.profile.domain.parseClassTime
+import com.example.androidhomework.feature.profile.notifications.ClassReminderScheduler
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,7 +25,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-data class EditProfileUiState(
+internal data class EditProfileUiState(
     val isLoaded: Boolean = false,
     val fullName: String = "",
     val position: String = "",
@@ -66,7 +66,7 @@ internal fun normalizeResumeUrl(raw: String): String {
 private fun isValidResumeUrl(url: String): Boolean =
     URLUtil.isHttpsUrl(url) && Patterns.WEB_URL.matcher(url).matches()
 
-class EditProfileViewModel(
+internal class EditProfileViewModel(
     private val repository: ProfileRepository,
     private val avatarStorage: AvatarStorage,
     private val reminderScheduler: ClassReminderScheduler
@@ -184,9 +184,9 @@ class EditProfileViewModel(
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 EditProfileViewModel(
-                    repository = AppContainer.profileRepository,
-                    avatarStorage = AppContainer.avatarStorage,
-                    reminderScheduler = AppContainer.classReminderScheduler
+                    repository = ProfileModule.profileRepository,
+                    avatarStorage = ProfileModule.avatarStorage,
+                    reminderScheduler = ProfileModule.classReminderScheduler
                 )
             }
         }
@@ -196,5 +196,5 @@ class EditProfileViewModel(
 private fun ClassReminderScheduler.Result.toMessage(time: String): String {
     val day = if (isToday) "today" else "tomorrow"
     val base = "Reminder set for $day at $time"
-    return if (isExact) base else "$base. It may arrive a few minutes late"
+    return if (isExact) base else "$base. Exact alarms are off, so it may arrive a few minutes late"
 }

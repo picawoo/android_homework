@@ -1,4 +1,4 @@
-package com.example.androidhomework.ui.screen
+package com.example.androidhomework.feature.profile.ui
 
 import android.content.ActivityNotFoundException
 import android.content.Context
@@ -58,14 +58,15 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.example.androidhomework.data.files.DownloadedFile
-import com.example.androidhomework.domain.model.UserProfile
-import com.example.androidhomework.ui.viewmodel.ProfileEvent
-import com.example.androidhomework.ui.viewmodel.ProfileViewModel
+import com.example.androidhomework.core.ui.CardShape
+import com.example.androidhomework.core.ui.GradientBackground
+import com.example.androidhomework.core.ui.MetaBadge
+import com.example.androidhomework.feature.profile.data.DownloadedFile
+import com.example.androidhomework.feature.profile.domain.UserProfile
 
 
 @Composable
-fun ProfileScreen(
+internal fun ProfileScreen(
     viewModel: ProfileViewModel,
     onEditClick: () -> Unit
 ) {

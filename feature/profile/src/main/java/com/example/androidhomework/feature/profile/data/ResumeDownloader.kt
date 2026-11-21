@@ -1,4 +1,4 @@
-package com.example.androidhomework.data.files
+package com.example.androidhomework.feature.profile.data
 
 import android.content.Context
 import android.net.Uri
@@ -23,13 +23,13 @@ private const val TIMEOUT_MS = 15_000
 private const val BUFFER_SIZE = 16 * 1024
 private const val MAX_REDIRECTS = 5
 
-data class DownloadedFile(val uri: Uri, val mimeType: String)
+internal data class DownloadedFile(val uri: Uri, val mimeType: String)
 
-class DownloadException(message: String, cause: Throwable? = null) : IOException(message, cause)
+internal class DownloadException(message: String, cause: Throwable? = null) : IOException(message, cause)
 
-class ResumeDownloader(private val context: Context) {
+internal class ResumeDownloader(private val context: Context) {
 
-    private val authority = "${context.packageName}.fileprovider"
+    private val authority = ProfileFileProvider.authority(context)
 
     private val directory: File
         get() = File(context.cacheDir, RESUMES_DIR).also { it.mkdirs() }

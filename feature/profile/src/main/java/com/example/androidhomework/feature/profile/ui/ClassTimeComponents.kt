@@ -1,4 +1,4 @@
-package com.example.androidhomework.ui.screen
+package com.example.androidhomework.feature.profile.ui
 
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api

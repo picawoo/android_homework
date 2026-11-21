@@ -1,12 +1,12 @@
-package com.example.androidhomework.data.repository
+package com.example.androidhomework.feature.profile.data
 
 import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.example.androidhomework.domain.model.UserProfile
-import com.example.androidhomework.domain.repository.ProfileRepository
+import com.example.androidhomework.feature.profile.domain.ProfileRepository
+import com.example.androidhomework.feature.profile.domain.UserProfile
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
@@ -14,7 +14,7 @@ import java.io.IOException
 
 private val Context.profileDataStore by preferencesDataStore(name = "user_profile")
 
-class ProfileRepositoryImpl(
+internal class ProfileRepositoryImpl(
     private val context: Context
 ) : ProfileRepository {
 

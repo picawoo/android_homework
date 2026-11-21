@@ -1,10 +1,10 @@
-package com.example.androidhomework.notifications
+package com.example.androidhomework.feature.profile.notifications
 
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 
-class ClassReminderReceiver : BroadcastReceiver() {
+internal class ClassReminderReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         val fullName = intent.getStringExtra(ClassReminderScheduler.EXTRA_FULL_NAME).orEmpty()

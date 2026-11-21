@@ -9,16 +9,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -44,7 +40,6 @@ import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import kotlin.math.absoluteValue
 
-internal val CardShape = RoundedCornerShape(24.dp)
 internal val CoverShape = RoundedCornerShape(16.dp)
 
 private val coverGradients = listOf(
@@ -55,26 +50,6 @@ private val coverGradients = listOf(
     listOf(Color(0xFFF2C94C), Color(0xFFF2994A)),
     listOf(Color(0xFFBB6BD9), Color(0xFF8E44AD))
 )
-
-@Composable
-internal fun GradientBackground(
-    modifier: Modifier = Modifier,
-    content: @Composable BoxScope.() -> Unit
-) {
-    val background = MaterialTheme.colorScheme.background
-    val accent = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f)
-
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    colorStops = arrayOf(0f to accent, 0.3f to background, 1f to background)
-                )
-            ),
-        content = content
-    )
-}
 
 @Composable
 internal fun shimmerBrush(): Brush {
@@ -191,31 +166,6 @@ private fun CoverPlaceholder(title: String) {
             style = MaterialTheme.typography.displayMedium,
             fontWeight = FontWeight.ExtraBold,
             color = Color.White.copy(alpha = 0.9f)
-        )
-    }
-}
-
-@Composable
-internal fun MetaBadge(text: String, icon: ImageVector) {
-    Row(
-        modifier = Modifier
-            .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f))
-            .padding(horizontal = 8.dp, vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            modifier = Modifier.size(12.dp),
-            tint = MaterialTheme.colorScheme.onPrimaryContainer
-        )
-        Spacer(modifier = Modifier.width(4.dp))
-        Text(
-            text = text,
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onPrimaryContainer
         )
     }
 }

@@ -1,4 +1,4 @@
-package com.example.androidhomework.data.files
+package com.example.androidhomework.feature.profile.data
 
 import android.content.Context
 import android.net.Uri
@@ -12,13 +12,9 @@ import androidx.core.net.toUri
 
 private const val AVATARS_DIR = "avatars"
 
-/**
- * Хранит аватарки в приватной папке приложения.
- * Благодаря этому не нужны разрешения на доступ к хранилищу.
- */
-class AvatarStorage(private val context: Context) {
+internal class AvatarStorage(private val context: Context) {
 
-    private val authority = "${context.packageName}.fileprovider"
+    private val authority = ProfileFileProvider.authority(context)
 
     private val directory: File
         get() = File(context.filesDir, AVATARS_DIR).also { it.mkdirs() }
@@ -52,7 +48,7 @@ class AvatarStorage(private val context: Context) {
     }
 
     suspend fun deleteAllExcept(keep: String?) = withContext(Dispatchers.IO) {
-        val keepName = keep?.toUri()?.lastPathSegment
+        val keepName = keep?.let { it.toUri().lastPathSegment }
         directory.listFiles()
             ?.filter { it.name != keepName }
             ?.forEach { it.delete() }

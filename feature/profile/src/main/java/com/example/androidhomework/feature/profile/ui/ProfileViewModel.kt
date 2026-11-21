@@ -1,15 +1,15 @@
-package com.example.androidhomework.ui.viewmodel
+package com.example.androidhomework.feature.profile.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.example.androidhomework.data.files.DownloadedFile
-import com.example.androidhomework.data.files.ResumeDownloader
-import com.example.androidhomework.di.AppContainer
-import com.example.androidhomework.domain.model.UserProfile
-import com.example.androidhomework.domain.repository.ProfileRepository
+import com.example.androidhomework.feature.profile.ProfileModule
+import com.example.androidhomework.feature.profile.data.DownloadedFile
+import com.example.androidhomework.feature.profile.data.ResumeDownloader
+import com.example.androidhomework.feature.profile.domain.ProfileRepository
+import com.example.androidhomework.feature.profile.domain.UserProfile
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -21,17 +21,17 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-data class ProfileUiState(
+internal data class ProfileUiState(
     val profile: UserProfile? = null,
     val isDownloading: Boolean = false
 )
 
-sealed interface ProfileEvent {
+internal sealed interface ProfileEvent {
     data class OpenFile(val file: DownloadedFile) : ProfileEvent
     data class ShowMessage(val text: String) : ProfileEvent
 }
 
-class ProfileViewModel(
+internal class ProfileViewModel(
     repository: ProfileRepository,
     private val resumeDownloader: ResumeDownloader
 ) : ViewModel() {
@@ -78,8 +78,8 @@ class ProfileViewModel(
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 ProfileViewModel(
-                    repository = AppContainer.profileRepository,
-                    resumeDownloader = AppContainer.resumeDownloader
+                    repository = ProfileModule.profileRepository,
+                    resumeDownloader = ProfileModule.resumeDownloader
                 )
             }
         }

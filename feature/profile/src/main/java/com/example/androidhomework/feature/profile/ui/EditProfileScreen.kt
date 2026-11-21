@@ -1,4 +1,4 @@
-package com.example.androidhomework.ui.screen
+package com.example.androidhomework.feature.profile.ui
 
 import android.Manifest
 import android.app.Activity
@@ -37,11 +37,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.PhotoLibrary
+import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
@@ -87,14 +87,14 @@ import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
-import com.example.androidhomework.ui.viewmodel.EditProfileViewModel
-import com.example.androidhomework.domain.model.parseClassTime
+import com.example.androidhomework.core.ui.GradientBackground
+import com.example.androidhomework.feature.profile.domain.parseClassTime
 import kotlinx.coroutines.launch
 import java.time.LocalTime
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditProfileScreen(
+internal fun EditProfileScreen(
     viewModel: EditProfileViewModel,
     onBackClick: () -> Unit,
     onDone: () -> Unit
@@ -372,6 +372,7 @@ private fun EditableAvatar(
             size = 128.dp,
             onClick = onClick
         )
+
         Box(
             modifier = Modifier
                 .align(Alignment.BottomEnd)

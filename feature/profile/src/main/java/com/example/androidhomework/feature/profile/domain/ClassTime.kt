@@ -1,4 +1,4 @@
-package com.example.androidhomework.domain.model
+package com.example.androidhomework.feature.profile.domain
 
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -8,9 +8,9 @@ private val ClassTimeRegex = Regex("^([01]\\d|2[0-3]):[0-5]\\d$")
 
 private val ClassTimeFormatter = DateTimeFormatter.ofPattern("HH:mm", Locale.ROOT)
 
-fun parseClassTime(text: String): LocalTime? =
+internal fun parseClassTime(text: String): LocalTime? =
     text.trim()
         .takeIf { ClassTimeRegex.matches(it) }
         ?.let { LocalTime.parse(it, ClassTimeFormatter) }
 
-fun formatClassTime(time: LocalTime): String = time.format(ClassTimeFormatter)
+internal fun formatClassTime(time: LocalTime): String = time.format(ClassTimeFormatter)

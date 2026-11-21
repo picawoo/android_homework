@@ -56,6 +56,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
+import com.example.androidhomework.core.ui.CardShape
+import com.example.androidhomework.core.ui.GradientBackground
 import com.example.androidhomework.domain.model.Book
 
 private const val MAX_VISIBLE_SUBJECTS = 5

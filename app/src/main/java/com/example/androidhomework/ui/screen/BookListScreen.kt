@@ -66,6 +66,9 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.example.androidhomework.core.ui.CardShape
+import com.example.androidhomework.core.ui.GradientBackground
+import com.example.androidhomework.core.ui.MetaBadge
 import com.example.androidhomework.domain.model.Book
 import com.example.androidhomework.ui.viewmodel.BookListViewModel
 import com.example.androidhomework.ui.viewmodel.FavoritesViewModel

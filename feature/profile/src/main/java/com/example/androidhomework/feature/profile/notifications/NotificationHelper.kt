@@ -1,15 +1,13 @@
-package com.example.androidhomework.notifications
+package com.example.androidhomework.feature.profile.notifications
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
 import androidx.core.app.NotificationCompat
-import com.example.androidhomework.MainActivity
-import com.example.androidhomework.R
+import com.example.androidhomework.feature.profile.R
 
-object NotificationHelper {
+internal object NotificationHelper {
 
     const val CHANNEL_ID = "class_reminders"
     private const val NOTIFICATION_ID = 1001
@@ -32,33 +30,32 @@ object NotificationHelper {
         if (!manager.areNotificationsEnabled()) return
         ensureChannel(context)
 
-        val launchIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)
-            ?: Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-
-        val contentIntent = PendingIntent.getActivity(
-            context,
-            0,
-            launchIntent,
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-        )
-
         val message = if (fullName.isBlank()) {
             "Your favorite class starts at $time"
         } else {
             "$fullName, your favorite class starts at $time"
         }
 
-        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_notification)
+        val builder = NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_class_reminder)
             .setContentTitle("Class time")
             .setContentText(message)
             .setStyle(NotificationCompat.BigTextStyle().bigText(message))
             .setCategory(NotificationCompat.CATEGORY_REMINDER)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
-            .setContentIntent(contentIntent)
-            .build()
 
-        manager.notify(NOTIFICATION_ID, notification)
+        context.packageManager.getLaunchIntentForPackage(context.packageName)?.let { launchIntent ->
+            builder.setContentIntent(
+                PendingIntent.getActivity(
+                    context,
+                    0,
+                    launchIntent,
+                    PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+                )
+            )
+        }
+
+        manager.notify(NOTIFICATION_ID, builder.build())
     }
 }

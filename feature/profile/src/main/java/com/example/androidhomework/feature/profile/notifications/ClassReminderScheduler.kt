@@ -1,16 +1,15 @@
-package com.example.androidhomework.notifications
+package com.example.androidhomework.feature.profile.notifications
 
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import com.example.androidhomework.domain.model.formatClassTime
+import com.example.androidhomework.feature.profile.domain.formatClassTime
 import java.time.LocalTime
 import java.time.ZonedDateTime
 
-
-class ClassReminderScheduler(private val context: Context) {
+internal class ClassReminderScheduler(private val context: Context) {
 
     class Result(
         val isToday: Boolean,

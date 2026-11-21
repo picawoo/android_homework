@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import com.example.androidhomework.di.AppContainer
+import com.example.androidhomework.feature.profile.ProfileModule
 import com.example.androidhomework.ui.navigation.MainScreen
 import com.example.androidhomework.ui.theme.AppTheme
 
@@ -11,6 +12,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         AppContainer.init(applicationContext)
+        ProfileModule.init(applicationContext)
 
         setContent {
             AppTheme {

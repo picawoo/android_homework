@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.androidhomework.core.ui.GradientBackground
 import com.example.androidhomework.domain.model.Book
 import com.example.androidhomework.ui.viewmodel.FavoritesViewModel
 
