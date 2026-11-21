@@ -21,4 +21,9 @@ dependencyResolutionManagement {
 
 rootProject.name = "androidHomework"
 include(":app")
- 
+include(":core:ui")
+include(":feature:profile")
+include(":core")
+include(":core")
+include(":core:ui")
+include(":feature:profile")
